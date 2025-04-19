@@ -4,13 +4,16 @@ import cors from "cors";
 import cookieParser from 'cookie-parser'
 import { db } from './config/db.config.js';
 import bodyParser from 'body-parser';
+import http from 'http';
+import { Server } from 'socket.io';
+import setupSocket from './config/socket.js';
 //importing the routes
 import userRoute from "./routes/userRoute/userRoute.js";
 import chatRoute from './routes/userRoute/chatRoute.js';
 
 dotenv.config();
 const app = express();
-
+const server = http.createServer(app);
 //declaring the port
 const PORT = process.env.PORT || 5000;
 
@@ -39,6 +42,13 @@ app.use("/api/v1/chat", chatRoute);
 app.get("/", (req, res)=>{
     res.send("akash")
 })
+// Setup Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+setupSocket(io);  
 
 db();
 
