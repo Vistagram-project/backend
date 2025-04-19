@@ -9,6 +9,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
+  image:{
+    type: String,
+    required: true,
+  },
   phoneNumber: {
     type: String,
     unique: true,
@@ -25,6 +29,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     select: false,
   },
+  is_online:{
+    type: String,
+    default: "0",
+  },
   isVerified: {
     type: Boolean,
     default: false,
@@ -33,6 +41,9 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   }
+},
+{
+  timestamps: true,
 });
 
 export default mongoose.model('User', userSchema);

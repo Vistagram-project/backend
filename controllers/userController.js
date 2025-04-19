@@ -2,9 +2,9 @@ import User from "../models/userSchema.js"
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwtTokenGenerate.js";
 
-
 export const registerUser = async (req , res)=>{
     const {name , email , password} = req.body
+    const file = req.file;
     if(!name || !email || !password){
         return res.status(400).json({
             success: false,
@@ -13,6 +13,7 @@ export const registerUser = async (req , res)=>{
     }
     //check if user already exists
     const user = await User.findOne({email})
+    console.log("user =>" + user )
     if(user){
         return res.status(400).json({
             success: false,
@@ -22,11 +23,15 @@ export const registerUser = async (req , res)=>{
     // hash password 
     const hashedPassword = await bcrypt.hash(password, 10);
     //create new user
+   
     const newUser = await User.create({
         name,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        image: 'images/' + file.filename
     })
+
+    console.log("newUser" + newUser )
     return res.status(201).json({
         success: true,
         message: "User registered successfully",
@@ -64,7 +69,7 @@ export const loginUser = async (req , res)=>{
     res.cookie('token', token, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
+        sameSite: 'strict', 
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
     return res.status(200).json({
@@ -73,7 +78,9 @@ export const loginUser = async (req , res)=>{
         user: {
             id: user._id,
             name: user.name,
-            email: user.email
+            email: user.email ,
+            token: token,
+            image: user.image
           }
     })
 }
