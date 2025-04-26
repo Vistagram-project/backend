@@ -13,7 +13,6 @@ export const registerUser = async (req , res)=>{
     }
     //check if user already exists
     const user = await User.findOne({email})
-    console.log("user =>" + user )
     if(user){
         return res.status(400).json({
             success: false,
@@ -84,11 +83,10 @@ export const loginUser = async (req , res)=>{
           }
     })
 }
-
+// Fetch user Details
 export const getUserDetails = async (req, res) => {
     try {
-      const user = req.user; // comes from auth middleware
-  
+      const user = req.user;
       if (!user) {
         return res.status(404).json({
           success: false,
