@@ -1,35 +1,54 @@
 // config/socket.js
+
 let onlineUsers = new Map();
 
 const setupSocket = (io) => {
   io.on("connection", (socket) => {
-    console.log("User connected: " + socket.id);
+    console.log(`🟢 User connected: ${socket.id}`);
 
+    // Handle new user connection
     socket.on("add-user", (userId) => {
-        console.log(userId);
-      onlineUsers.set(socket.id,{ id:socket.id, userId:userId });
-      io.emit("user-online",Array.from(onlineUsers.values()))
-      io.emit()
+      console.log(`👤 Adding user: ${userId}`);
+      onlineUsers.set(userId, { socketId: socket.id, userId });
+      
+      // Notify all clients about updated online users
+      io.emit("user-online", Array.from(onlineUsers.values()));
     });
 
-    socket.on("send-message", ({ to, from, message }) => {
-        console.log(to + " " + from + " " + message);
-
-      const receiverSocketId = onlineUsers.get(to);
-      if (receiverSocketId) {
-        socket.to(receiverSocketId).emit("receive-message", { from, message });
+    // Handle sending message
+    socket.on("send-message", ({ from, to, message }) => {
+      console.log(`✉️ Message from ${from} to ${to}: ${message}`);
+      console.log("online USer =>>>>", onlineUsers)
+      const receiver = onlineUsers.get(to); // to = userId
+      console.log("recerver =>", receiver)
+      if (receiver) {
+        io.to(receiver.socketId).emit("receive-message", { from, message });
+        console.log(`📤 Sent to ${receiver.socketId}`);
+      } else {
+        console.log("❌ Receiver not online");
       }
     });
 
+    // Handle disconnect
     socket.on("disconnect", () => {
-      console.log("User disconnected: " + socket.id);
-      [...onlineUsers.entries()].forEach(([key, value]) => {
-        if (value === socket.id) {
-          onlineUsers.delete(key);
+      console.log(`🔴 User disconnected: ${socket.id}`);
+      
+      // Find and remove user from onlineUsers
+      let disconnectedUserId = null;
+      for (let [userId, userInfo] of onlineUsers.entries()) {
+        if (userInfo.socketId === socket.id) {
+          disconnectedUserId = userId;
+          onlineUsers.delete(userId);
+          break;
         }
-      });
+      }
+
+      if (disconnectedUserId) {
+        console.log(`🛑 Removed user: ${disconnectedUserId}`);
+        io.emit("user-online", Array.from(onlineUsers.values()));
+      }
     });
   });
 };
 
-export default  setupSocket;
+export default setupSocket;
