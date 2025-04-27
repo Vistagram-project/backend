@@ -10,7 +10,7 @@ import setupSocket from './config/socket.js';
 
 //importing the routes
 import userRoute from "./routes/userRoute/userRoute.js";
-import chatRoute from './routes/userRoute/chatRoute.js';
+import chatRoute from "./routes/chatRoute.js";
 
 dotenv.config();
 const app = express();
