@@ -1,5 +1,5 @@
 // config/socket.js
-
+import { saveMessageService } from "../controllers/chatController.js";
 let onlineUsers = new Map();
 
 const setupSocket = (io) => {
@@ -15,10 +15,17 @@ const setupSocket = (io) => {
       io.emit("user-online", Array.from(onlineUsers.values()));
     });
 
-    // Handle sending message
-    socket.on("send-message", ({ from, to, message }) => {
+    // Handle sending message 
+    socket.on("send-message", async ({ from, to, message }) => {
       console.log(`✉️ Message from ${from} to ${to}: ${message}`);
-      console.log("online USer =>>>>", onlineUsers)
+      // 🔥 Save the message to the database first
+      try {
+        console.log("from => ", from + " ", "to => ", to + " ", "msg=> ", message)
+        await saveMessageService({ senderId: from, receiverId: to, message } );
+      } catch (error) {
+        console.error("Failed to save message:", error);
+      }
+
       const receiver = onlineUsers.get(to); // to = userId
       console.log("recerver =>", receiver)
       if (receiver) {
